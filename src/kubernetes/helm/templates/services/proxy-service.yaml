@@ -24,8 +24,33 @@ spec:
         app: proxy-service
     spec:
       containers:
-      - name: proxy-service
-        ..... тут
+        - name: proxy-service
+          image: "{{ .Values.proxyService.image.repository }}:{{ .Values.proxyService.image.tag }}"
+          imagePullPolicy: {{ .Values.proxyService.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.proxyService.service.targetPort }}
+          env:
+            - name: PORT
+              value: "8000"
+            - name: MONOLITH_URL
+              value: "http://monolith:8080"
+            - name: MOVIES_SERVICE_URL
+              value: "http://movies-service:8081"
+            - name: EVENTS_SERVICE_URL
+              value: "http://events-service:8082"
+            - name: GRADUAL_MIGRATION
+              value: "true"
+            - name: MOVIES_MIGRATION_PERCENT
+              value: "100"
+          resources:
+            limits:
+              cpu: {{ .Values.proxyService.resources.limits.cpu }}
+              memory: {{ .Values.proxyService.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.proxyService.resources.requests.cpu }}
+              memory: {{ .Values.proxyService.resources.requests.memory }}
+      imagePullSecrets:
+        - name: dockerconfigjson
 ---
 apiVersion: v1
 kind: Service
@@ -38,5 +63,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
-    ... и тут
+    app: proxy-service
+  ports:
+    - protocol: TCP
+      port: {{ .Values.proxyService.service.port }}
+      targetPort: {{ .Values.proxyService.service.targetPort }}
+  type: {{ .Values.proxyService.service.type }}
 {{- end }}

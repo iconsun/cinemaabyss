@@ -1,0 +1,89 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь (Web / Mobile / TV)")
+
+System_Boundary(s1, "Платформа CinemaAbyss (To-Be)") {
+
+    Boundary(entryPoint, "Единая точка входа") {
+        Container(webBFF,  "Web BFF")
+        Container(mobileBFF,"Mobile BFF")
+        Container(tvBFF,   "TV BFF")
+    }
+
+    Container(users,         "Users Service",         "", "Регистрация, вход, профиль")
+    ContainerDb(usersDb,     "Users DB")
+    Container(payments,      "Payments Service",      "", "Платежи и подписки")
+    ContainerDb(paymentsDb,  "Payments DB")
+    Container(discounts,     "Discounts Service",     "", "Скидки и акции")
+    ContainerDb(discountsDb, "Discounts DB")
+    Container(video,         "Video Service",         "", "Метаданные и стриминг видео")
+    Container(movies,        "Movies Metadata Service","", "Каталог фильмов, рейтинги")
+    ContainerDb(moviesDb,    "Movies DB")
+    Container(subscriptions, "Subscriptions Service", "", "Тарифы и подписки")
+    ContainerDb(subscriptionsDb,"Subscriptions DB")
+
+
+    ContainerQueue(kafka,  "Apache Kafka", "", "Асинхронный обмен сообщениями между микросервисами")
+    Container(events, "Events Service", "", "Консьюмер и продюсер доменных событий; обогащение / ретрансляция")
+
+
+    ContainerQueue(rabbit, "RabbitMQ", "", "Канал данных только для Recommendation System")
+
+}
+
+System_Ext(recommender, "Recommendation System", "Внешняя рекомендательная система")
+System_Ext(extvideo,    "External Video Store", "Внешнее хранилище видео")
+System_Ext(bank, "External Bank System")
+
+
+Rel(user, webBFF,    "")
+Rel(user, mobileBFF, "")
+Rel(user, tvBFF,     "")
+
+
+Rel(webBFF,    users,         "")
+Rel(webBFF,    payments,      "")
+Rel(webBFF,    discounts,     "")
+Rel(webBFF,    subscriptions, "")
+Rel(webBFF,    movies,        "")
+Rel(webBFF,    video,         "")
+
+Rel(mobileBFF, users,         "")
+Rel(mobileBFF, payments,      "")
+Rel(mobileBFF, discounts,     "")
+Rel(mobileBFF, subscriptions, "")
+Rel(mobileBFF, movies,        "")
+Rel(mobileBFF, video,         "")
+
+Rel(tvBFF,     users,         "")
+Rel(tvBFF,     payments,      "")
+Rel(tvBFF,     discounts,     "")
+Rel(tvBFF,     subscriptions, "")
+Rel(tvBFF,     movies,        "")
+Rel(tvBFF,     video,         "")
+
+
+Rel(users,         usersDb,          "")
+Rel(payments,      paymentsDb,       "")
+Rel(discounts,     discountsDb,      "")
+Rel(subscriptions, subscriptionsDb,  "")
+Rel(movies,        moviesDb,         "")
+Rel(video,         extvideo,         "")
+Rel(payments,      bank,            "")
+
+Rel(users,         kafka, "User events")
+Rel(payments,      kafka, "Payment events")
+Rel(discounts,     kafka, "Discount events")
+Rel(subscriptions, kafka, "Subscription events")
+Rel(movies,        kafka, "Movie events")
+Rel(video,         kafka, "Stream events")
+
+Rel(kafka, events, "")
+Rel(events, kafka, "")
+
+
+Rel(movies, rabbit, "")
+Rel(rabbit, recommender, "")
+
+@enduml

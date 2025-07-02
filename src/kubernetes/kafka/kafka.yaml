@@ -30,7 +30,7 @@ spec:
       storage: 1Gi
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: zookeeper
   namespace: cinemaabyss
@@ -112,7 +112,7 @@ spec:
       storage: 5Gi
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: kafka
   namespace: cinemaabyss
